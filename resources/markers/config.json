@@ -1,0 +1,69 @@
+{
+	"type": "Collection",
+	"properties": {
+		"text": {
+			"name": "text",
+			"type": "string",
+			"typeLabel": "string",
+			"required": true,
+			"id": "text",
+			"order": 0
+		},
+		"lat": {
+			"name": "lat",
+			"type": "number",
+			"typeLabel": "number",
+			"required": true,
+			"id": "lat",
+			"order": 1
+		},
+		"lng": {
+			"name": "lng",
+			"type": "number",
+			"typeLabel": "number",
+			"required": true,
+			"id": "lng",
+			"order": 2
+		},
+		"createdBy": {
+			"name": "createdBy",
+			"type": "string",
+			"typeLabel": "string",
+			"required": false,
+			"id": "createdBy",
+			"order": 3
+		},
+		"dateCreated": {
+			"name": "dateCreated",
+			"type": "number",
+			"typeLabel": "number",
+			"required": false,
+			"id": "dateCreated",
+			"order": 4
+		},
+		"deletedBool": {
+			"name": "deletedBool",
+			"type": "boolean",
+			"typeLabel": "boolean",
+			"required": false,
+			"id": "deletedBool",
+			"order": 5
+		},
+		"dateDeleted": {
+			"name": "dateDeleted",
+			"type": "number",
+			"typeLabel": "number",
+			"required": false,
+			"id": "dateDeleted",
+			"order": 6
+		},
+		"deletedBy": {
+			"name": "deletedBy",
+			"type": "string",
+			"typeLabel": "string",
+			"required": false,
+			"id": "deletedBy",
+			"order": 7
+		}
+	}
+}

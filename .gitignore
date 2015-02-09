@@ -1,4 +1,3 @@
-resources
 lib-cov
 *.seed
 *.log
@@ -7,10 +6,13 @@ lib-cov
 *.out
 *.pid
 *.gz
+
 pids
 logs
 results
+
 .dpd
 data
+
 npm-debug.log
 .DS_Store
