@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Advanced Archeage Map - Login Page</title>
+  <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+  <script src= "/js/angular.min.js"></script>
+  <script type="text/javascript" src="/dpd.js"></script>
+</head>
+<body>
+  <p>Version 0.1.0 date 09-12-2014 made by developer@ipepe.pl</p>
+  <div class="container" ng-app ng-controller="membersCtrl">
+    <h2><div id="heading1">Welcome to main menu page, nobody!</div></h2>
+    <form>
+      <button class="btn" onclick="logoutBtn()">Logout</button>
+      <button class="btn" onclick="function x (){location.href='/map.html';} x()">Open a map window</button>
+    </form>
+    <h3><div id="groupDiv">You are member of: none (group)</div></h3>
+    </br>
+    <h3>Create new group (You can't if You are in group already)</h3>
+    <table class"table table-striped">
+      <tr>
+        <td>
+          <form id="crtGrpForm"class="navbar-form pull-left">
+            <input form="crtGrpForm" type="text" class="span2" id="createGroupInpt" placeholder="Name of group">
+            <button form="crtGrpForm" type="submit" class="btn" id="createGroupBtn" onclick="createGroup()" disabled>Create new Group</button>
+          </form>
+        </td>
+      </tr>
+    </table>
+    </br>
+    </br>
+    <h3>Group controlling form (You can't if You are not in leaders)</h3>
+    <table class"table table-striped">
+      <tr>
+        <td>
+          <form id="nwMmbrForm" class="navbar-form pull-left">
+            <input type="text" form="nwMmbrForm" class="span2" id="addMemberInpt" placeholder="Username">
+            <button type="submit" form="nwMmbrForm" class="btn" id="addMemberBtn" onclick="addMember()" disabled>Add new member</button>
+          </form>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <form id="kckMmbrForm" class="navbar-form pull-left">
+            <input type="text" form="kckMmbrForm" class="span2" id="kickMemberInpt" placeholder="Username">
+            <button type="submit" form="kckMmbrForm" class="btn" id="kickMemberBtn" onclick="kickMember()" disabled>Kick member</button>
+          </form>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <form id="addLdrForm" class="navbar-form pull-left">
+            <input form="addLdrForm" type="text" class="span2" id="addLeaderInpt" placeholder="Username">
+            <button form="addLdrForm" type="submit" class="btn" id="addLeaderBtn" onclick="addLeader()" disabled>Add new leader/officer</button>
+          </form>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <form id="kckLdrForm" class="navbar-form pull-left">
+            <input form="kckLdrForm" type="text" class="span2" id="kickLeaderInpt" placeholder="Username">
+            <button form="kckLdrForm" type="submit" class="btn" id="kickLeaderBtn" onclick="kickLeader()" disabled>Demote leader/officer</button>
+          </form>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <form class="navbar-form pull-left">
+            <h4>Current group leaders:</h4>
+            <div >
+              <table class="table table-bordered">
+                <thead><tr><th>#</th><th>Username</th></tr></thead>
+                <tbody>
+                <tr ng-repeat="user in leaders">
+                  <td>{{ $index+1 }}</td>
+                  <td>{{ user }}</td>
+                </tr>
+              </tbody>
+              </table>
+            </div>
+          </form>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <form class="navbar-form pull-left">
+            <h4>Current group members:</h4>
+            <div >
+              <table class="table table-bordered">
+                <thead><tr><th>#</th><th>Username</th></tr></thead>
+                <tbody>
+                <tr ng-repeat="user in members">
+                  <td>{{ $index+1 }}</td>
+                  <td>{{ user }}</td>
+                </tr>
+              </tbody>
+              </table>
+            </div>
+          </form>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <!-- TODO: leader deleting himself from group/-->
+  <script type="text/javascript">
+    function addMember(){
+      dpd.groups.get(function(result,error){
+        if(error){
+          alert(error.message);
+        }else{
+          var newMemValue = document.getElementById('addMemberInpt').value;
+
+          dpd.groups.put(result[0].id, { members: { "$pushAll" : [newMemValue] } } , function(result,error){
+            if(error){
+              alert(error.message);
+            }else{
+              alert('New members result: ' + result.members);
+            }
+          });
+        }
+      });      
+    }
+    function kickMember () {
+      dpd.groups.get(function(result,error){
+        if(error){
+          alert(error);
+        }else if(result.length !== 1){
+          alert("You are in none or more in one group");
+        }else {
+          var kickMemValue = document.getElementById('kickMemberInpt').value;
+
+          dpd.groups.put(result[0].id, {leaders: { "$pullAll" : [kickMemValue] }, members: { "$pullAll" : [kickMemValue] } } , function(result,error){
+            if(error){
+              alert(error.message);
+            }else{
+              alert('New members result: ' + result.members);
+            }
+          });
+        }
+      });
+    }
+    function addLeader(){
+      dpd.groups.get(function(result,error){
+        if(error){
+          alert(error);
+        }else{
+          var newLeaderValue = document.getElementById('addLeaderInpt').value;
+          
+          dpd.groups.put(result[0].id, {leaders: { "$pushAll" : [newLeaderValue] }, members: { "$pushAll" : [newLeaderValue] } } , function(result,error){
+            if(error){
+              alert(error.message);
+            }else{
+              alert('New leaders result: ' + result.leaders);
+            }
+        });
+        }
+      }); 
+    }
+    function createGroup(){
+      dpd.users.me(function(me){
+        var groupName = document.getElementById('createGroupInpt').value
+        dpd.groups.post( {name: groupName}, function(result,error){
+          if(error){
+            alert(error.message);
+          }else{
+            alert('Succesfully created: ' + result.name);
+          }
+        });
+      });
+    }
+    function kickLeader(){
+      dpd.groups.get(function(result,error){
+        if(error){
+          alert(error);
+        }else{
+          var kickLeaderValue = document.getElementById('kickLeaderInpt').value;
+
+          dpd.groups.put(result[0].id, {leaders: { "$pullAll" : [kickLeaderValue] } } , function(result,error){
+            if(error){
+              alert(error.message);
+            }else{
+              alert('New leaders result: ' + result.leaders);
+            }
+        });
+        }
+      });
+    }
+  </script>
+  <script type="text/javascript">
+    var currUser;
+    dpd.users.me(function(user) {
+      if (user) {
+        currUser = user.username;
+        document.getElementById('heading1').innerHTML = ('Welcome to main menu page, ' + user.username + '!');
+        dpd.groups.get(function(result){
+          if(result.length == 0){
+            document.getElementById('createGroupBtn').disabled = false;
+            
+            document.getElementById('addMemberBtn').disabled = true;
+            document.getElementById('addLeaderBtn').disabled = true;
+            document.getElementById('kickMemberBtn').disabled = true;
+            document.getElementById('kickLeaderBtn').disabled = true;
+
+          }else{
+            if( result[0].leaders.indexOf(user.username) != -1){
+              document.getElementById('createGroupBtn').disabled = true;
+              
+              document.getElementById('addMemberBtn').disabled = false;
+              document.getElementById('addLeaderBtn').disabled = false;
+              document.getElementById('kickMemberBtn').disabled = false;
+              document.getElementById('kickLeaderBtn').disabled = false;
+            }
+            document.getElementById('groupDiv').innerHTML = 'You are member of: ' + result[0].name + ' (group)';
+          }
+        });
+      } else {
+        location.href = "/";
+      }
+    });
+    function logoutBtn() {
+      dpd.users.logout(function(res, err) {
+        location.href = "/";
+      });
+    }
+  </script>
+  <script type="text/javascript">
+    function membersCtrl($scope,$http) {
+      $http.get("/groups")
+      .success(function(response) {
+        $scope.members = response[0].members;
+        $scope.leaders = response[0].leaders;
+      });
+    }
+  </script>
+  <script type="text/javascript">
+    dpd.hits.post( { 
+      user: currUser,
+      ref: document.referrer,  
+      addr: myip,
+      nav: navigator.oscpu.toString(),
+      lang: navigator.languages.toSource(),
+      agent: navigator.userAgent.toString()
+    } , console.log); 
+  </script>
+</body>
+</html>
