@@ -37,10 +37,10 @@
     dpd.users.me(function(user) {
       if (user) {
       	//console.log(user);
-        document.getElementById('div-username').innerHTML = 'Welcome, ' + user.username + '!';
+        document.getElementById('div-username').innerHTML = 'Welcome members of SSD. '!';
         dpd.groups.get(function(result){
         	if(result.length > 0){
-        		document.getElementById('div-group').innerHTML = 'You are member of: ' + result[0].name + ' (group)';
+        		document.getElementById('div-group').innerHTML = 'I suggest not clicking the buttons.';
         	}
         });
         // if(user.memberOf !== undefined){
