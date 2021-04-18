@@ -1,1 +1,0 @@
-cancel('You cant delete groups');
