@@ -1,12 +1,174 @@
 <!DOCTYPE html>
-<html>
-<head>
+<HTML>
+<HEAD>
 	<title>Archeage Map</title>
-  <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
-</head>
-<body>
-  <div class="container">
-  	<h1>Nothing to see here.</h1>
-  </div>
-</body>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	
+	<!-- Leaflet library for easy maping /-->
+	<script type="text/javascript" src="js/leaflet.js"></script>
+	<link rel="stylesheet" href="css/leaflet.css" />
+	<!-- lib that helps out for declaring icons for leaflet /-->
+	<script src="js/icons.js"></script>
+	<!-- Boostrap js --/>
+	<link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+	
+	<!-- My libraries and stylesheets /-->
+	<link rel="stylesheet" href="css/style.css" type="text/css" />
+	<script type="text/javascript" src="/dpd.js"></script>
+	<link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+
+	<!--[if lte IE 8]>
+		<link rel="stylesheet" href="css/leaflet.ie.css" />
+	<![endif]-->
+</HEAD>
+<BODY>
+	<table bgcolor="white" class="table table-bordered" style="margin-bottom:0px"><tr>
+		<td><hl><b>Spiffing Searching Discord</b> - [Broadcast] Importent shit will be dropped here.</nl></td>
+	</tr></table>
+    
+	<div id="map"></div>
+
+	<script type="text/javascript">
+    dpd.users.me(function(user) {
+      if (user) {
+      	//console.log(user);
+        document.getElementById('div-username').innerHTML = 'Welcome members of SSD. '!';
+        dpd.groups.get(function(result){
+        	if(result.length > 0){
+        		document.getElementById('div-group').innerHTML = 'I suggest not clicking the buttons.';
+        	}
+        });
+        // if(user.memberOf !== undefined){
+        // 	document.getElementById('div-group').innerHTML = 'You are member of: ' + user.memberOf;
+        // }
+      } else {
+        location.href = "/";
+      }
+    });
+    </script>
+
+	<script>
+	var mapUrl = 'map/{z}/{x}/{y}.jpg'; 
+	var minimal   = L.tileLayer(mapUrl, {minZoom:2,maxZoom:7,noWrap:false,tms: true});
+	var map = L.map('map', {center: [-68, -90],zoomControl:false , zoom: 2, layers: [minimal]});
+	
+	var MapClicker=0;
+	var MarkerArrayList = new Array;
+	</script>
+	
+	<script>
+	function logoutBtn() {
+      dpd.users.logout(function(res, err) {
+        location.href = "/";
+      });
+    }
+	</script>
+	
+	<script>
+	function putNewMarker(){
+		if (MapClicker == 1) {
+			editsSwitch = 0;
+			document.getElementById('map').style.cursor = 'all-scroll';
+		}else {
+			editsSwitch = 1;
+			document.getElementById('map').style.cursor = 'crosshair';
+		}
+		MapClicker = editsSwitch;
+	}
+	</script>
+		
+	<script>
+	function delMarkerPopup(id){
+		var result = confirm("Are You sure You want to delete?");
+		if (result==true) {
+			delMarker(id);
+		}
+	}
+	function delMarker(id){
+		if(id=="no-id"){
+			for (var i = 0; i < MarkerArrayList.length; i++) {
+				map.removeLayer(MarkerArrayList[i]);
+			}
+			loadMarkers();
+		}else{
+			dpd.markers.put( MarkerArrayList[id].options.id, { deletedBool: true }, console.log);
+			
+			for (var i = 0; i < MarkerArrayList.length; i++) {
+				map.removeLayer(MarkerArrayList[i]);
+			}
+			loadMarkers();
+		}
+		MarkerArrayList = new Array;
+	}
+	</script>
+
+	<script>		
+	function onClick(e) {
+		if (MapClicker == 1){
+			GlobalCount = MarkerArrayList.length;
+	
+			MarkerArrayList.push(new L.marker(e.latlng, { id: "no-id", icon: markerIcon }));
+	
+			MarkerCh = MarkerArrayList[GlobalCount];
+	
+			markerpopuptext = '<table><tr><td><button onclick="delMarkerPopup(\'no-id\')">Delete<br>Marker</button></td><td rowspan="2"><div id="div-' + Number(GlobalCount+1) + '" contenteditable="false">You must edit, then save and marker will be writen to database</div></td></tr><tr><td><button onclick="changeEdit('+ Number(GlobalCount) +',this,document.getElementById(\'div-' + Number(GlobalCount+1) + '\'))">Edit<br>Marker</button></td></tr></table>';
+
+			MarkerCh.bindPopup(markerpopuptext);
+			//dpd.markers.post({lat: MarkerCh._latlng.lat, lng: MarkerCh._latlng.lng, text: MarkerCh._popup._content})
+			map.addLayer(MarkerCh);
+			MapClicker = 0;
+			document.getElementById('map').style.cursor = 'all-scroll';
+		}
+	};
+	map.on('click', onClick);
+	</script>
+
+	<script>
+	function changeEdit(markerPos , buttonObj, divObj ){
+		
+		if( divObj.contentEditable == "true"){
+			console.log(divObj.innerHTML);
+			divObj.contentEditable=false;
+			divObj.style.backgroundColor=""; 
+			buttonObj.innerHTML="Edit<br>Marker";
+			MarkerCh = MarkerArrayList[markerPos];
+			markerId = MarkerCh.options.id;
+			if(markerId == "no-id"){
+				dpd.markers.post({lat: MarkerCh._latlng.lat, lng: MarkerCh._latlng.lng, text: divObj.innerHTML},console.log);
+			}else{
+				//console.log(MarkerCh.options.id);
+				//console.log(markerId);
+				dpd.markers.put( MarkerCh.options.id, { text: divObj.innerHTML }, console.log);
+			}
+			delMarker(markerId);
+			
+		}else{
+			divObj.contentEditable=true;
+			divObj.style.backgroundColor="yellow";
+			buttonObj.innerHTML="Save<br>Marker"; 
+		}
+	}
+	</script>
+	
+	<script>
+	function loadMarkers(){
+		dpd.markers.get(function(markers, error){
+			if (error) {
+				alert(error.message);
+			}else{
+				for (var i = 0; i < markers.length; i++) {
+					var markerId = (markers[i].id);
+					var newMarker = new L.marker( L.latLng(markers[i].lat, markers[i].lng) , {id: markerId, icon: markerIcon} );
+					newMarker = newMarker.bindPopup('<table><tr><td><button onclick="delMarkerPopup('+ Number(i) +')">Delete<br>Marker</button></td><td rowspan="2"><div id="div-' + Number(i+1) + '" contenteditable="false">' + markers[i].text  + '</div></td></tr><tr><td><button onclick="changeEdit('+ Number(i) + ',this,document.getElementById(\'div-' + Number(i+1) + '\'))">Edit<br>Marker</button></td></tr></table>');
+					MarkerArrayList.push(newMarker);
+					map.addLayer(newMarker);
+				}
+			}
+		} );
+	}
+	loadMarkers();
+	</script>
+
+</BODY>
 </html>
